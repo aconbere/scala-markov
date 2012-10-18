@@ -9,12 +9,10 @@ trait MarkovC[C,T] {
   val stop:C
 
   def add(k:(C,C), v:C):MarkovC[C,T]
+  def choice(x:T):Option[C]
 
   def contains(k:(C,C)) = chain.contains(k)
-
   def random[K](l:List[K]) = l(new Random().nextInt(l.length))
-
-  def choice(x:T):Option[C]
 
   def seed = {
     random(chain.keys.filter { case (s, _) => s == start }.toList)
