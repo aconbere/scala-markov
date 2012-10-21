@@ -11,57 +11,47 @@ import com.conbere.markov._
 class MarkovSuite extends FunSuite {
   val planetNames = Source.fromFile("./src/test/resources/planets.txt").getLines.toList
 
-  trait TestM {
-    val m1 = new MarkovChainList[Char]('\2', '\3', 2)
-    val m2 = m1.insert("ab".toList)
-    val mm1 = new MarkovChainMap[Char]('\2', '\3', 2)
-    val mm2 = m1.insert("ab".toList)
+  trait TestStateStorage {
+    val s1 = new StateStorage[Char]()
+    val s2 = s1.add(('a', 'b'), 'c').add(('b', 'c'), 'd')
+    val s3 = s1.insert("abcd".toList)
   }
 
-  def testLargeInsert[T](m:MarkovChain[Char,T]) = {
+  trait TestM {
+    val m1 = new MarkovChain[Char]('\2', '\3')
+    val m2 = m1.insert("ab".toList)
+  }
+
+  def testLargeInsert[T](m:MarkovChain[Char]) = {
     planetNames.foldLeft(m)((acc, n) => acc.insert(n.toLowerCase.toList)).generate(10)
   }
 
-  def testInsert[T](m:MarkovChain[Char,T]) = {
-    assert(m.contains(List('\2', 'a')))
-    assert(m.contains(List('a', 'b')))
+  def testGenerate[T](m:MarkovChain[Char]) = {
+    val x = m.generate(10)
+    assert(x == Some(List('a', 'b')))
   }
 
-  def testSeed[T](m:MarkovChain[Char,T]) = {
-    val s = m.seed
-    assert(s == List('\2', 'a'))
+  test("state add") {
+    new TestStateStorage {
+      assert(s2.keys == Set(('a', 'b'), ('b', 'c')))
+    }
   }
 
-  def testGenerate[T](m:MarkovChain[Char,T]) = {
-    assert(m.seed == List('\2', 'a'))
-    assert(m.generate(10) == List('a', 'b'))
+  test("state insert") {
+    new TestStateStorage {
+      assert(s3.keys == Set(('a', 'b'), ('b', 'c')))
+    }
   }
 
   test("a large insert") {
     new TestM {
       testLargeInsert(m1)
-      testLargeInsert(mm1)
-    }
-  }
-
-  test("insert") {
-    new TestM {
-      testInsert(m2)
-      testInsert(mm2)
-    }
-  }
-
-  test("seed") {
-    new TestM {
-      testSeed(m2)
-      testSeed(mm2)
     }
   }
 
   test("generate") {
     new TestM {
       testGenerate(m2)
-      testGenerate(mm2)
     }
   }
 }
