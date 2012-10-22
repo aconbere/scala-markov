@@ -24,7 +24,7 @@ object Markov extends App {
                   // MarkovChainMap is a markov chain that stores the chain
                   // options in a Map[C,Int]. This map is working over Chars
                   .foldLeft(new MarkovChain[Char](start, stop))((acc, n) =>
-                    acc.insert(n.toLowerCase.toList
+                    acc.insert(n.toLowerCase.toList)
                   ))
 
     // Generate a new planet name based on the corpus with a maximum length
