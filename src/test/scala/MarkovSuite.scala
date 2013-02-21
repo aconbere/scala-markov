@@ -5,7 +5,7 @@ import org.scalatest.junit.JUnitRunner
 
 import org.junit.runner.RunWith
 
-import com.conbere.markov._
+import org.conbere.markov._
 
 @RunWith(classOf[JUnitRunner])
 class MarkovSuite extends FunSuite {

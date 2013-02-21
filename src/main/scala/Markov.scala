@@ -1,4 +1,4 @@
-package com.conbere.markov
+package org.conbere.markov
 
 import scala.util.Random
 import scala.io.Source

@@ -6,7 +6,7 @@ Some expirements in markov chains
 
 ```scala
 import scala.io.Source
-import com.conbere.markov._
+import org.conbere.markov._
 
 object Markov extends App {
   def main(args: Array[String]) = {
