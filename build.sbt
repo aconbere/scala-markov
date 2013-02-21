@@ -27,7 +27,7 @@ pomIncludeRepository := { _ => false }
 
 licenses := Seq("BSD-style" -> url("http://www.opensource.org/licenses/bsd-license.php"))
 
-homepage := Some(url("http://jsuereth.com/scala-arm"))
+homepage := Some(url("http://github.com/aconbere/scala-markov"))
 
 pomExtra := (
   <scm>
