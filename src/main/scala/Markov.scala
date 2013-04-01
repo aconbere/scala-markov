@@ -3,17 +3,6 @@ package org.conbere.markov
 import scala.util.Random
 import scala.io.Source
 
-package object M {
-  def random[K](l: List[K]): Option[K] = {
-    l.length match {
-      case 0 =>
-        None
-      case _ =>
-        Some(l(new Random().nextInt(l.length)))
-    }
-  }
-}
-
 class Frequency[C](val frequencies: Map[C,Int]) {
   def this() = this(Map[C,Int]())
 
@@ -46,18 +35,23 @@ class Frequency[C](val frequencies: Map[C,Int]) {
   override def toString = frequencies.toString
 }
 
-class StateStorage[C] (val frequencies: Map[(C,C), Frequency[C]]) {
-  def this() = this(Map[(C,C), Frequency[C]]())
+class StateStorage[C] (val transitions: Map[(C,C), Frequency[C]], val startTransitions: Frequency[C], val startState: C) {
 
   def add(k:(C,C), v:C):StateStorage[C] = {
-    val old = frequencies.getOrElse(k, new Frequency[C]())
-    new StateStorage[C](frequencies + (k -> old.add(v)))
+    val old = transitions.getOrElse(k, new Frequency[C]())
+    new StateStorage[C](transitions + (k -> old.add(v)), startTransitions, startState)
+  }
+
+  def addStart(k :C):StateStorage[C] = {
+    new StateStorage[C](transitions, startTransitions.add(k), startState)
   }
 
   def insert(w: List[C]) = {
     w.sliding(3)
      .foldLeft(this)((acc, l) =>
        l match {
+         case List(`startState`, x2, x3) =>
+           acc.add((startState, x2), x3).addStart(x2)
          case List(x1, x2, x3) =>
            acc.add((x1, x2), x3)
          case _ =>
@@ -66,17 +60,19 @@ class StateStorage[C] (val frequencies: Map[(C,C), Frequency[C]]) {
      )
   }
 
-  def keys = frequencies.keys
+  def keys = transitions.keys
+
+  def start: Option[C] = startTransitions.choice
 
   def next(seed: (C,C)): Option[C] = {
-    for (l <- frequencies.get(seed);
+    for (l <- transitions.get(seed);
          n <- l.choice)
     yield {
        n
     }
   }
 
-  override def toString = frequencies.toString
+  override def toString = transitions.toString
 }
 
 class MarkovChain[C](val start: C,
@@ -84,14 +80,11 @@ class MarkovChain[C](val start: C,
                      val edges: StateStorage[C]) {
 
   def this(start: C, stop: C) =
-    this(start, stop, new StateStorage[C]())
+    this(start, stop, new StateStorage[C](Map[(C,C), Frequency[C]](), new Frequency[C](), start))
 
   def insert(w: List[C]) = {
     new MarkovChain(start, stop, edges.insert((start :: w) :+ stop))
   }
-
-  def randomKey =
-    M.random(edges.keys.filter { case (x1, x2) => x1 == start }.toList)
 
   def generate(maxLength: Int): Option[List[C]] = {
     def inner(count: Int, acc: List[C], previous: (C,C)): List[C] = {
@@ -109,11 +102,8 @@ class MarkovChain[C](val start: C,
       }
     }
 
-    for (k <- randomKey) yield {
-      k match {
-        case s @ (x1, x2) =>
-          inner(maxLength, List(x2), s)
-      }
+    for (k <- edges.start) yield {
+      inner(maxLength, List(k), (start, k))
     }
   }
 }

@@ -12,7 +12,7 @@ class MarkovSuite extends FunSuite {
   val planetNames = Source.fromFile("./src/test/resources/planets.txt").getLines.toList
 
   trait TestStateStorage {
-    val s1 = new StateStorage[Char]()
+    val s1 = new StateStorage[Char](Map[(Char, Char), Frequency[Char]](), new Frequency[Char](), 'a')
     val s2 = s1.add(('a', 'b'), 'c').add(('b', 'c'), 'd')
     val s3 = s1.insert("abcd".toList)
   }
