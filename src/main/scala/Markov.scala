@@ -3,15 +3,15 @@ package org.conbere.markov
 import scala.util.Random
 import scala.io.Source
 
-class Frequency[C](val transitions: Map[C,Int]) {
+class Frequency[C](val frequencies: Map[C,Int]) {
   def this() = this(Map[C,Int]())
 
   def add(v: C): Frequency[C] = {
-    val old = transitions.getOrElse(v,0)
-    new Frequency(transitions + (v -> (old + 1)))
+    val old = frequencies.getOrElse(v,0)
+    new Frequency(frequencies + (v -> (old + 1)))
   }
 
-  def contains(v: C) = transitions.contains(v)
+  def contains(v: C) = frequencies.contains(v)
 
   def choice() = {
     def inner(l: List[(C,Int)], n: Int): Option[C]= {
@@ -27,12 +27,12 @@ class Frequency[C](val transitions: Map[C,Int]) {
         }
       }
     }
-    inner(transitions.toList,
+    inner(frequencies.toList,
           new Random()
-            .nextInt(transitions.values.sum))
+            .nextInt(frequencies.values.sum))
   }
 
-  override def toString = transitions.toString
+  override def toString = frequencies.toString
 }
 
 class StateStorage[C] (val transitions: Map[(C,C), Frequency[C]], val startTransitions: Frequency[C], val startState: C) {
