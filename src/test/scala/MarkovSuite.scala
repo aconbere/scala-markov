@@ -28,12 +28,12 @@ class MarkovSuite extends FunSuite {
 
   def testGenerate[T](m:MarkovChain[Char]) = {
     val x = m.generate(10)
-    assert(x == Some(List('a', 'b')))
+    assert(x === List('a', 'b'))
   }
 
   test("state add") {
     new TestStateStorage {
-      assert(s2.keys == Set(('a', 'b'), ('b', 'c')))
+      assert(s2.keys === Set(('a', 'b'), ('b', 'c')))
     }
   }
 
