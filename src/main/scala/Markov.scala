@@ -3,17 +3,6 @@ package org.conbere.markov
 import scala.util.Random
 import scala.io.Source
 
-package object M {
-  def random[K](l: List[K]): Option[K] = {
-    l.length match {
-      case 0 =>
-        None
-      case _ =>
-        Some(l(new Random().nextInt(l.length)))
-    }
-  }
-}
-
 class Frequency[C](val frequencies: Map[C,Int]) {
   def this() = this(Map[C,Int]())
 
@@ -87,11 +76,8 @@ class MarkovChain[C](val start: C,
     this(start, stop, new StateStorage[C]())
 
   def insert(w: List[C]) = {
-    new MarkovChain(start, stop, edges.insert((start :: w) :+ stop))
+    new MarkovChain(start, stop, edges.insert((List(start, start) ::: w) :+ stop))
   }
-
-  def randomKey =
-    M.random(edges.keys.filter { case (x1, x2) => x1 == start }.toList)
 
   def generate(maxLength: Int): Option[List[C]] = {
     def inner(count: Int, acc: List[C], previous: (C,C)): List[C] = {
@@ -108,12 +94,6 @@ class MarkovChain[C](val start: C,
         acc
       }
     }
-
-    for (k <- randomKey) yield {
-      k match {
-        case s @ (x1, x2) =>
-          inner(maxLength, List(x2), s)
-      }
-    }
+    Some(inner(maxLength, List[C](), (start, start)))
   }
 }
